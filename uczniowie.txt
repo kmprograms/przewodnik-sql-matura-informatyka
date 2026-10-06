@@ -1,0 +1,7 @@
+id_ucznia	imie	nazwisko	klasa	miasto	pesel
+1	Anna	Kowalska	3A	Poznań	02271512345
+2	Jan	Nowicki	3A	Gniezno	85010112345
+3	Ola	Kowal	3B	Poznań	90020212345
+4	Piotr	Zieliński	3B		03220512345
+5	Ewa	Mazur	3A	Poznań	99123112345
+6	Łukasz	Żak	3C	Łódź	04251012345

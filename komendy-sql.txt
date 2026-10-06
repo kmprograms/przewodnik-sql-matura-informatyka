@@ -1,0 +1,140 @@
+----------------------------------------------------------------------------------------------------------------------------------------------
+TWORZENIE TABEL
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE klasy (klasa VARCHAR(255), wychowawca VARCHAR(255));
+CREATE TABLE uczniowie (id_ucznia INT, imie VARCHAR(255), nazwisko VARCHAR(255), klasa VARCHAR(255), miasto VARCHAR(255), pesel VARCHAR(255));
+CREATE TABLE oceny (id_oceny INT, id_ucznia INT, przedmiot VARCHAR(255), ocena INT, data_oceny DATE);
+
+
+# Modyfikacja kolumny w tabeli uczniowie - pusty napis w kolumnie miasto to NULL
+UPDATE uczniowie SET miasto = NULL WHERE miasto = '';
+
+
+# Dodajemy klucze główne i klucze obce
+ALTER TABLE klasy ADD PRIMARY KEY (klasa);
+ALTER TABLE uczniowie ADD PRIMARY KEY (id_ucznia);
+ALTER TABLE oceny ADD PRIMARY KEY (id_oceny);
+ALTER TABLE uczniowie ADD CONSTRAINT fk_uczen_klasa FOREIGN KEY (klasa) REFERENCES klasy (klasa);
+ALTER TABLE oceny ADD CONSTRAINT fk_ocena_uczen FOREIGN KEY (id_ucznia) REFERENCES uczniowie (id_ucznia);
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+ZAPYTANIA
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+# Wyświetl imię i nazwisko ucznia, który uczy się w mieście Poznań i nie chodzi do klasy 3B
+# SELECT imie, nazwisko FROM uczniowie WHERE miasto = 'Poznań' AND klasa <> '3B';
+
+
+# Sortowanie
+# SELECT imie, nazwisko FROM uczniowie WHERE miasto = 'Poznań' AND klasa <> '3B' ORDER BY imie ASC, nazwisko DESC;
+SELECT * FROM uczniowie ORDER BY nazwisko DESC, imie ASC;
+
+
+# Kilka pierwszych rekordów
+# SELECT id_oceny, ocena FROM oceny ORDER BY ocena DESC LIMIT 3;
+
+
+# Pominięcie 2 wierszy i pobranie 3 kolejnych
+SELECT id_oceny, ocena FROM oceny ORDER BY ocena DESC LIMIT 3 OFFSET 2;
+
+
+# Usuwanie powtórzeń
+SELECT DISTINCT miasto FROM uczniowie WHERE miasto IS NOT NULL ORDER BY miasto;
+
+
+# Wzorce tekstu, LIKE
+# % oznacza dowolny ciąg znaków
+# _ oznacza jeden znak
+# Chcemy zeby nazwisko zaczynało się od Kow
+SELECT nazwisko FROM uczniowie WHERE nazwisko LIKE 'Kow%'
+
+
+# Daty i łączenie warunków
+SELECT id_oceny, data_oceny FROM oceny WHERE data_oceny BETWEEN '2026-09-10' AND '2026-09-15' OR (id_oceny >= 1 AND id_oceny < 5);
+
+
+# Listy
+# SELECT imie FROM uczniowie WHERE klasa = '3A' OR klasa = '3C';
+SELECT imie FROM uczniowie WHERE klasa IN ('3A', '3C');
+
+
+# Sprawdzenie pól ustawionych na NULL
+SELECT imie FROM uczniowie WHERE miasto IS NULL;
+
+
+# Funkcje agregujące
+SELECT COUNT(*) AS liczba, SUM(ocena) AS suma, AVG(ocena) AS srednia, MIN(ocena) AS najnizsza, MAX(ocena) AS najwyzsza FROM oceny;
+
+
+# Zaokrąglanie
+SELECT ROUND(AVG(ocena), 2) AS srednia FROM oceny;
+
+
+# COUNT(*) liczy wiersze. COUNT(kolumna) pomija puste pola (NULL)
+SELECT COUNT(*) AS wszyscy, COUNT(miasto) AS z_miastem from uczniowie;
+
+
+# GRUPOWANIE: GROUP BY, HAVING
+# SELECT * FROM uczniowie;
+SELECT klasa, COUNT(*) AS liczba FROM uczniowie GROUP BY klasa ORDER BY liczba DESC;
+
+
+# GROUP BY + HAVING
+SELECT id_ucznia, AVG(ocena) AS srednia FROM oceny GROUP BY id_ucznia HAVING srednia > 3.5;
+
+
+# INNER JOIN
+
+SELECT u.nazwisko, o.przedmiot, o.ocena
+FROM uczniowie AS u INNER JOIN oceny AS o ON u.id_ucznia = o.id_ucznia;
+
+
+SELECT k.wychowawca, u.id_ucznia, o.ocena
+FROM klasy AS k INNER JOIN uczniowie AS u ON k.klasa = u.klasa
+INNER JOIN oceny AS o ON u.id_ucznia = o.id_ucznia;
+
+
+# INNER JOIN NA 3 TABELACH + GRUPOWANIE + WHERE + HAVING
+SELECT k.wychowawca, u.id_ucznia, AVG(o.ocena) AS srednia
+FROM klasy AS k INNER JOIN uczniowie AS u ON k.klasa = u.klasa
+INNER JOIN oceny AS o ON u.id_ucznia = o.id_ucznia
+WHERE k.wychowawca = 'Lis'
+GROUP BY k.wychowawca, u.id_ucznia
+HAVING srednia >= 4;
+
+
+# LEFT JOIN
+SELECT u.id_ucznia, u.imie, u.nazwisko, o.ocena
+FROM uczniowie AS u LEFT JOIN oceny AS o ON u.id_ucznia = o.id_ucznia
+WHERE o.ocena IS NULL;
+
+
+# RIGHT JOIN
+SELECT k.klasa, k.wychowawca, u.nazwisko
+FROM uczniowie AS u RIGHT JOIN klasy AS k ON u.klasa = k.klasa
+ORDER BY k.klasa, u.nazwisko;
+
+INSERT INTO klasy VALUES ('3D', 'Kos');
+
+
+# DATA
+
+SELECT YEAR(data_oceny) AS rok, COUNT(*) AS liczba FROM oceny GROUP BY YEAR(data_oceny);
+
+SELECT id_oceny,data_oceny, MONTH(data_oceny) AS miesiac, DAYOFWEEK(data_oceny) AS dzien_tygodnia, DATEDIFF('2027-05-17', data_oceny) AS dni_do_matury FROM oceny;
+
+
+# NAPISY
+
+SELECT imie, nazwisko, CONCAT(LEFT(imie, 1), LEFT(nazwisko, 1)) AS inicjaly FROM uczniowie;
+SELECT imie, nazwisko, LENGTH(imie) FROM uczniowie;
+
+
+# CONCAT Z NULL daje NULL. CONCAT_WS pomija NULL. 
+SELECT CONCAT(imie, ' ', miasto) AS z_concat, CONCAT_WS(' ', imie, miasto) AS z_concat_ws
+FROM uczniowie WHERE id_ucznia = 4;
+
+# Fragment napisu
+SELECT pesel, SUBSTRING(pesel, 1, 2) AS rok, MID(pesel, 3, 2) AS miesiac, RIGHT(pesel, 1) AS ostatnia_cyfra FROM uczniowie;

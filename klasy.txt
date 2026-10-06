@@ -1,0 +1,4 @@
+klasa	wychowawca
+3A	Nowak
+3B	Lis
+3C	Wrona

@@ -1,0 +1,9 @@
+id_oceny	id_ucznia	przedmiot	ocena	data_oceny
+1	1	informatyka	5	2026-09-10
+2	1	matematyka	4	2026-10-02
+3	2	informatyka	3	2026-09-15
+4	3	informatyka	5	2026-11-20
+5	3	fizyka	2	2026-11-21
+6	4	informatyka	4	2027-01-08
+7	1	informatyka	6	2027-02-01
+8	6	matematyka	3	2027-01-15
